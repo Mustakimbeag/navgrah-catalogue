@@ -35,13 +35,9 @@ div[class*="grid"] > div > div:first-child,
 .my-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000}
 .my-ov.active{display:block}
 .v-wrap{margin:12px;background:#000;border-radius:14px;overflow:hidden;display:none}
-.v-wrap2{margin:12px;background:#000;border-radius:14px;overflow:hidden;display:none}
-.v-wrap3{margin:12px;background:#000;border-radius:14px;overflow:hidden;display:none}
 .v-wrap.has-video{display:block}
-.v-wrap2.has-video{display:block}
-.v-wrap3.has-video{display:block}
-.v-wrap video,.v-wrap iframe,.v-wrap2 video,.v-wrap2 iframe,.v-wrap3 video,.v-wrap3 iframe{width:100%;height:300px;display:block}
-@media(min-width:768px){.v-wrap video,.v-wrap iframe,.v-wrap2 video,.v-wrap2 iframe,.v-wrap3 video,.v-wrap3 iframe{height:400px}}
+.v-wrap video,.v-wrap iframe{width:100%;height:300px;display:block}
+@media(min-width:768px){.v-wrap video,.v-wrap iframe{height:400px}}
 </style>
 
 </head>
@@ -86,9 +82,7 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
   <h3 style="margin:0 0 10px 0;color:#16a34a;font-weight:800">🛠️ Admin Panel</h3>
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
     <button id="b-add" style="background:#16a34a;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer">+ Product Add Karo</button>
-    <button id="b-vid" style="background:#2563eb;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer">+ Video Ad 1 Lagao</button>
-    <button id="b-vid2" style="background:#7c3aed;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer">+ Video Ad 2 Lagao</button>
-    <button id="b-vid3" style="background:#db2777;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer">+ Video Ad 3 Lagao</button>
+    <button id="b-vid" style="background:#2563eb;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer">+ Video Ad Lagao</button>
   </div>
   <p style="margin:8px 0 0 0;font-size:11px;color:#666">Logo pe 5 baar click karo edit mode ON/OFF ke liye</p>
 </div>
@@ -136,23 +130,7 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
     const header=document.querySelector('header');
     const bar=document.getElementById('my-bar');
     const vwrap=document.getElementById('v-wrap');
-    const vwrap2=document.getElementById('v-wrap2');
-    const vwrap3=document.getElementById('v-wrap3');
-    if(header && bar){ 
-      header.parentNode.insertBefore(vwrap, header.nextSibling); 
-      header.parentNode.insertBefore(bar, vwrap.nextSibling); 
-      // Place 2nd and 3rd video ads in different places - after some grids
-      setTimeout(()=>{
-        const grids=document.querySelectorAll('div[class*="grid"]');
-        if(grids[0] && vwrap2){ grids[0].parentNode.insertBefore(vwrap2, grids[0].nextSibling); }
-        if(grids[1] && vwrap3){ grids[1].parentNode.insertBefore(vwrap3, grids[1].nextSibling); }
-        else if(grids[0] && vwrap3){
-          // fallback - place after first grid's next sibling
-          let container = document.getElementById('root');
-          if(container) container.appendChild(vwrap3);
-        }
-      },1500);
-    }
+    if(header && bar){ header.parentNode.insertBefore(vwrap, header.nextSibling); header.parentNode.insertBefore(bar, vwrap.nextSibling); }
     
     // Edit mode - logo pe 5 baar click
     let clicks=0;
@@ -174,26 +152,15 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
       });
     }
     
-    window.currentVideoSlot = 1;
     document.getElementById('b-add').onclick=()=>{document.getElementById('p-form').classList.add('active'); document.getElementById('my-ov').classList.add('active');};
-    document.getElementById('b-vid').onclick=()=>{window.currentVideoSlot=1; document.getElementById('v-form').classList.add('active'); document.getElementById('my-ov').classList.add('active');};
-    const bvid2 = document.getElementById('b-vid2');
-    if(bvid2) bvid2.onclick=()=>{window.currentVideoSlot=2; document.getElementById('v-form').classList.add('active'); document.getElementById('my-ov').classList.add('active');};
-    const bvid3 = document.getElementById('b-vid3');
-    if(bvid3) bvid3.onclick=()=>{window.currentVideoSlot=3; document.getElementById('v-form').classList.add('active'); document.getElementById('my-ov').classList.add('active');};
+    document.getElementById('b-vid').onclick=()=>{document.getElementById('v-form').classList.add('active'); document.getElementById('my-ov').classList.add('active');};
     document.getElementById('p-cancel').onclick=closeAll;
     document.getElementById('v-cancel').onclick=closeAll;
     document.getElementById('my-ov').onclick=closeAll;
     
     document.getElementById('v-remove').onclick=()=>{
-      const slot = window.currentVideoSlot || 1;
-      const wrapId = slot===1 ? 'v-wrap' : slot===2 ? 'v-wrap2' : 'v-wrap3';
-      const key = slot===1 ? 'navgrah_video_ad' : slot===2 ? 'navgrah_video_ad2' : 'navgrah_video_ad3';
-      const wrap = document.getElementById(wrapId);
-      if(wrap){ wrap.innerHTML=''; wrap.classList.remove('has-video'); }
-      localStorage.removeItem(key); 
-      // also if slot 1, remove all for backward compatibility? No, only current
-      closeAll();
+      document.getElementById('v-wrap').innerHTML=''; document.getElementById('v-wrap').classList.remove('has-video');
+      localStorage.removeItem('navgrah_video_ad'); closeAll();
     };
     
     document.getElementById('p-save').onclick=()=>{
@@ -228,11 +195,7 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
       const url=document.getElementById('v-url').value.trim();
       const file=document.getElementById('v-file');
       function setV(src, isYt){
-        const slot = window.currentVideoSlot || 1;
-        const wrapId = slot===1 ? 'v-wrap' : slot===2 ? 'v-wrap2' : 'v-wrap3';
-        const key = slot===1 ? 'navgrah_video_ad' : slot===2 ? 'navgrah_video_ad2' : 'navgrah_video_ad3';
-        const wrap=document.getElementById(wrapId);
-        if(!wrap){ alert('Video slot nahi mila'); return; }
+        const wrap=document.getElementById('v-wrap');
         if(isYt){
           let vid=src; try{const u=new URL(src); if(u.hostname.includes('youtu.be')) vid=u.pathname.slice(1); else if(u.searchParams.get('v')) vid=u.searchParams.get('v');}catch(e){}
           wrap.innerHTML=`<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:380px"></iframe>`;
@@ -240,8 +203,8 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
           wrap.innerHTML=`<video src="${src}" controls autoplay muted loop playsinline style="width:100%;height:380px"></video>`;
         }
         wrap.classList.add('has-video');
-        localStorage.setItem(key, JSON.stringify({src:src, isYt:isYt}));
-        closeAll(); alert('Video Ad '+slot+' lag gaya!');
+        localStorage.setItem('navgrah_video_ad', JSON.stringify({src:src, isYt:isYt}));
+        closeAll(); alert('Video ad lag gaya!');
       }
       if(file.files && file.files[0]){const r=new FileReader(); r.onload=e=>setV(e.target.result,false); r.readAsDataURL(file.files[0]);}
       else if(url){setV(url, url.includes('youtube')||url.includes('youtu.be'));}
@@ -249,22 +212,17 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
     };
     
     try{
-      [1,2,3].forEach(slot=>{
-        const key = slot===1 ? 'navgrah_video_ad' : slot===2 ? 'navgrah_video_ad2' : 'navgrah_video_ad3';
-        const wrapId = slot===1 ? 'v-wrap' : slot===2 ? 'v-wrap2' : 'v-wrap3';
-        const saved=JSON.parse(localStorage.getItem(key)||'null');
-        if(saved){
-          const wrap=document.getElementById(wrapId);
-          if(!wrap) return;
-          if(saved.isYt){
-            let vid=saved.src; try{const u=new URL(saved.src); if(u.hostname.includes('youtu.be')) vid=u.pathname.slice(1); else if(u.searchParams.get('v')) vid=u.searchParams.get('v');}catch(e){}
-            wrap.innerHTML=`<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}" frameborder="0" allowfullscreen style="width:100%;height:380px"></iframe>`;
-          } else {
-            wrap.innerHTML=`<video src="${saved.src}" controls autoplay muted loop playsinline style="width:100%;height:380px"></video>`;
-          }
-          wrap.classList.add('has-video');
+      const saved=JSON.parse(localStorage.getItem('navgrah_video_ad')||'null');
+      if(saved){
+        const wrap=document.getElementById('v-wrap');
+        if(saved.isYt){
+          let vid=saved.src; try{const u=new URL(saved.src); if(u.hostname.includes('youtu.be')) vid=u.pathname.slice(1); else if(u.searchParams.get('v')) vid=u.searchParams.get('v');}catch(e){}
+          wrap.innerHTML=`<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}" frameborder="0" allowfullscreen style="width:100%;height:380px"></iframe>`;
+        } else {
+          wrap.innerHTML=`<video src="${saved.src}" controls autoplay muted loop playsinline style="width:100%;height:380px"></video>`;
         }
-      });
+        wrap.classList.add('has-video');
+      }
     }catch(e){}
     
     setInterval(()=>{if(document.body.classList.contains('is-editing')) addDelBtns();},1000);
@@ -274,51 +232,41 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
 </script>
 
 
+<style id="admin-3video">
+.v-wrap,.v-wrap2,.v-wrap3{margin:12px;background:#000;border-radius:14px;overflow:hidden;display:none;position:relative}
+.v-wrap.has-video,.v-wrap2.has-video,.v-wrap3.has-video{display:block}
+.v-wrap video,.v-wrap iframe,.v-wrap2 video,.v-wrap2 iframe,.v-wrap3 video,.v-wrap3 iframe{width:100%;height:300px;display:block}
+@media(min-width:768px){.v-wrap video,.v-wrap iframe,.v-wrap2 video,.v-wrap2 iframe,.v-wrap3 video,.v-wrap3 iframe{height:400px}}
+.v-label{position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:white;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;z-index:5}
+</style>
+<div id="v-wrap" class="v-wrap"><span class="v-label">AD 1</span></div>
+<div id="v-wrap2" class="v-wrap2"><span class="v-label">AD 2</span></div>
+<div id="v-wrap3" class="v-wrap3"><span class="v-label">AD 3</span></div>
 <script>
 (function(){
-  console.log('Navgrah FIX V2 - modal sync');
+  console.log('FIX: 3 independent video ads + edit sync');
 
+  // === EDIT SYNC FIX ===
   function getSavedEdits(){
-    try{
-      return JSON.parse(localStorage.getItem('navgrah_edits')||'[]');
-    }catch(e){ return []; }
+    try{ return JSON.parse(localStorage.getItem('navgrah_edits')||'[]'); }catch(e){ return []; }
   }
-  function saveEdits(){
-    try{
-      const all = document.querySelectorAll('[data-editable]');
-      const arr = Array.from(all).map(m=>({k:m.getAttribute('data-editable'), html:m.innerHTML}));
-      localStorage.setItem('navgrah_edits', JSON.stringify(arr));
-      // console.log('saved', arr.length);
-    }catch(e){}
-  }
-
-  function getEditValue(key){
-    const saved = getSavedEdits();
-    const found = saved.find(s=>s.k===key);
-    if(found) return found.html;
-    // fallback: if asking for modal-xxx, try base xxx
-    if(key.startsWith('modal-')){
-      const base = key.replace('modal-','');
-      const baseFound = saved.find(s=>s.k===base);
-      if(baseFound) return baseFound.html;
-      // also try live DOM card
-      const cardEl = document.querySelector(`[data-editable="${base}"]`);
-      if(cardEl) return cardEl.innerHTML;
-    }
-    return null;
-  }
-
   function applySavedToElement(el){
     const k = el.getAttribute('data-editable');
     if(!k) return;
-    const val = getEditValue(k);
-    if(val && el.innerHTML !== val){
-      el.innerHTML = val;
-      console.log('Applied saved to', k, val);
+    const saved = getSavedEdits();
+    let found = saved.find(s=>s.k===k);
+    if(!found && k.startsWith('modal-')){
+      const base = k.replace('modal-','');
+      found = saved.find(s=>s.k===base);
+      if(!found){
+        const cardEl = document.querySelector(`[data-editable="${base}"]`);
+        if(cardEl) { el.innerHTML = cardEl.innerHTML; return; }
+      }
+    }
+    if(found && el.innerHTML !== found.html){
+      el.innerHTML = found.html;
     }
   }
-
-  // On blur, sync card -> modal keys in storage
   document.addEventListener('blur', function(e){
     const el = e.target;
     if(!el.hasAttribute || !el.hasAttribute('data-editable')) return;
@@ -326,44 +274,27 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
     const html = el.innerHTML;
     try{
       let saved = getSavedEdits();
-      // update or add this key
       let idx = saved.findIndex(s=>s.k===k);
-      if(idx>=0) saved[idx].html = html;
-      else saved.push({k:k, html:html});
-
-      // if it's a card edit (not modal), also update modal key in storage
+      if(idx>=0) saved[idx].html = html; else saved.push({k:k, html:html});
       if(!k.startsWith('modal-')){
         const modalKey = 'modal-'+k;
         let idx2 = saved.findIndex(s=>s.k===modalKey);
-        if(idx2>=0) saved[idx2].html = html;
-        else saved.push({k:modalKey, html:html});
-        console.log('Sync card', k, '->', modalKey);
+        if(idx2>=0) saved[idx2].html = html; else saved.push({k:modalKey, html:html});
+        const modalEl = document.querySelector(`[data-editable="${modalKey}"]`);
+        if(modalEl) modalEl.innerHTML = html;
       } else {
-        // if modal edited, sync back to card
         const base = k.replace('modal-','');
         let idx2 = saved.findIndex(s=>s.k===base);
-        if(idx2>=0) saved[idx2].html = html;
-        else saved.push({k:base, html:html});
+        if(idx2>=0) saved[idx2].html = html; else saved.push({k:base, html:html});
       }
-
       localStorage.setItem('navgrah_edits', JSON.stringify(saved));
-      
-      // Also live update if modal is currently open
-      if(!k.startsWith('modal-')){
-        const modalEl = document.querySelector(`[data-editable="modal-${k}"]`);
-        if(modalEl) modalEl.innerHTML = html;
-      }
-    }catch(err){ console.error(err); }
+    }catch(err){}
   }, true);
-
-  // MutationObserver: when modal opens, its elements are added to DOM - apply saved edits immediately
   const observer = new MutationObserver(function(mutations){
     mutations.forEach(function(m){
       m.addedNodes.forEach(function(node){
         if(node.nodeType!==1) return;
-        if(node.hasAttribute && node.hasAttribute('data-editable')){
-          applySavedToElement(node);
-        }
+        if(node.hasAttribute && node.hasAttribute('data-editable')) applySavedToElement(node);
         const nested = node.querySelectorAll ? node.querySelectorAll('[data-editable]') : [];
         nested.forEach(applySavedToElement);
       });
@@ -371,13 +302,280 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
   });
   observer.observe(document.body, {childList:true, subtree:true});
 
-  // Also interval check for modal that appears - just in case
-  setInterval(function(){
-    const modals = document.querySelectorAll('[data-editable^="modal-"]');
-    modals.forEach(applySavedToElement);
-  }, 500);
+  // === 3 VIDEO ADS INDEPENDENT ===
+  window.currentVideoSlot = 1;
 
-  console.log('Navgrah FIX V2 active');
+  function getVideoKey(slot){ return slot===1 ? 'navgrah_video_ad' : 'navgrah_video_ad'+slot; }
+  function getWrapId(slot){ return slot===1 ? 'v-wrap' : 'v-wrap'+slot; }
+
+  function restoreAllVideos(){
+    [1,2,3].forEach(slot=>{
+      const key = getVideoKey(slot);
+      const wrapId = getWrapId(slot);
+      try{
+        const saved = JSON.parse(localStorage.getItem(key)||'null');
+        const wrap = document.getElementById(wrapId);
+        if(!wrap || !saved) return;
+        // keep label
+        const label = wrap.querySelector('.v-label');
+        const labelHTML = label ? label.outerHTML : `<span class="v-label">AD ${slot}</span>`;
+        if(saved.isYt){
+          let vid=saved.src;
+          try{ const u=new URL(saved.src); if(u.hostname.includes('youtu.be')) vid=u.pathname.slice(1); else if(u.searchParams.get('v')) vid=u.searchParams.get('v'); }catch(e){}
+          wrap.innerHTML = labelHTML + `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:380px"></iframe>`;
+        } else {
+          wrap.innerHTML = labelHTML + `<video src="${saved.src}" controls autoplay muted loop playsinline style="width:100%;height:380px"></video>`;
+        }
+        wrap.classList.add('has-video');
+      }catch(e){}
+    });
+  }
+
+  function placeVideoWraps(){
+    const header = document.querySelector('header');
+    const bar = document.getElementById('my-bar');
+    const v1 = document.getElementById('v-wrap');
+    const v2 = document.getElementById('v-wrap2');
+    const v3 = document.getElementById('v-wrap3');
+    if(header && bar && v1){
+      // Ensure bar is after header, v1 after bar
+      header.parentNode.insertBefore(v1, header.nextSibling);
+      header.parentNode.insertBefore(bar, v1.nextSibling);
+    }
+    // Place v2 and v3 at different spots
+    setTimeout(()=>{
+      const grids = document.querySelectorAll('div[class*="grid"]');
+      const root = document.getElementById('root');
+      if(grids.length>=1 && v2){
+        // After first grid
+        grids[0].parentNode.insertBefore(v2, grids[0].nextSibling);
+      }
+      if(grids.length>=2 && v3){
+        grids[1].parentNode.insertBefore(v3, grids[1].nextSibling);
+      } else if(grids.length>=1 && v3){
+        // If only 1 grid, place v3 after some product section or at bottom
+        if(root){
+          // Try to find main container
+          const main = document.querySelector('main') || root.firstChild;
+          if(main && main.appendChild) main.appendChild(v3);
+          else root.appendChild(v3);
+        }
+      }
+      restoreAllVideos();
+    }, 1200);
+  }
+
+  setTimeout(placeVideoWraps, 800);
+
+  // Override admin buttons
+  setTimeout(()=>{
+    const bAdd = document.getElementById('b-add');
+    const bVid = document.getElementById('b-vid');
+    const pForm = document.getElementById('p-form');
+    const vForm = document.getElementById('v-form');
+    const ov = document.getElementById('my-ov');
+    const vRemove = document.getElementById('v-remove');
+    const vUrl = document.getElementById('v-url');
+    const vFile = document.getElementById('v-file');
+    const vSave = document.getElementById('v-save');
+
+    if(bAdd){
+      bAdd.onclick=()=>{ pForm.classList.add('active'); ov.classList.add('active'); };
+    }
+
+    // Create 3 buttons if not exist
+    if(bVid && !document.getElementById('b-vid2')){
+      bVid.textContent = '+ Video AD 1';
+      bVid.style.background = '#2563eb';
+      const b2 = document.createElement('button');
+      b2.id='b-vid2';
+      b2.textContent='+ Video AD 2';
+      b2.style.cssText='background:#7c3aed;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;margin-left:6px';
+      b2.onclick=()=>{ window.currentVideoSlot=2; if(vForm) vForm.classList.add('active'); if(ov) ov.classList.add('active'); const title=vForm.querySelector('h3'); if(title) title.textContent='Video Ad 2 Lagao (Alag Video)'; };
+      bVid.parentNode.appendChild(b2);
+      const b3 = document.createElement('button');
+      b3.id='b-vid3';
+      b3.textContent='+ Video AD 3';
+      b3.style.cssText='background:#db2777;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;margin-left:6px';
+      b3.onclick=()=>{ window.currentVideoSlot=3; if(vForm) vForm.classList.add('active'); if(ov) ov.classList.add('active'); const title=vForm.querySelector('h3'); if(title) title.textContent='Video Ad 3 Lagao (Alag Video)'; };
+      bVid.parentNode.appendChild(b3);
+      bVid.onclick=()=>{ window.currentVideoSlot=1; if(vForm) vForm.classList.add('active'); if(ov) ov.classList.add('active'); const title=vForm.querySelector('h3'); if(title) title.textContent='Video Ad 1 Lagao (Alag Video)'; };
+    }
+
+    if(vRemove){
+      vRemove.onclick=()=>{
+        const slot = window.currentVideoSlot || 1;
+        const wrapId = getWrapId(slot);
+        const key = getVideoKey(slot);
+        const wrap = document.getElementById(wrapId);
+        if(wrap){
+          const label = wrap.querySelector('.v-label');
+          wrap.innerHTML = label ? label.outerHTML : '';
+          wrap.classList.remove('has-video');
+        }
+        localStorage.removeItem(key);
+        const ov = document.getElementById('my-ov');
+        const vf = document.getElementById('v-form');
+        if(vf) vf.classList.remove('active');
+        if(ov) ov.classList.remove('active');
+        alert('Video Ad '+slot+' hata diya');
+      };
+    }
+
+    if(vSave){
+      vSave.onclick=()=>{
+        const urlEl = document.getElementById('v-url');
+        const fileEl = document.getElementById('v-file');
+        const url = urlEl ? urlEl.value.trim() : '';
+        const slot = window.currentVideoSlot || 1;
+        const wrapId = getWrapId(slot);
+        const key = getVideoKey(slot);
+        function setV(src, isYt){
+          const wrap = document.getElementById(wrapId);
+          if(!wrap) return;
+          const label = wrap.querySelector('.v-label');
+          const labelHTML = label ? label.outerHTML : `<span class="v-label">AD ${slot}</span>`;
+          if(isYt){
+            let vid=src;
+            try{ const u=new URL(src); if(u.hostname.includes('youtu.be')) vid=u.pathname.slice(1); else if(u.searchParams.get('v')) vid=u.searchParams.get('v'); }catch(e){}
+            wrap.innerHTML = labelHTML + `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:380px"></iframe>`;
+          } else {
+            wrap.innerHTML = labelHTML + `<video src="${src}" controls autoplay muted loop playsinline style="width:100%;height:380px"></video>`;
+          }
+          wrap.classList.add('has-video');
+          localStorage.setItem(key, JSON.stringify({src:src, isYt:isYt}));
+          const vf = document.getElementById('v-form');
+          const ov = document.getElementById('my-ov');
+          if(vf) vf.classList.remove('active');
+          if(ov) ov.classList.remove('active');
+          if(urlEl) urlEl.value='';
+          if(fileEl) fileEl.value='';
+          alert('Video Ad '+slot+' lag gaya! Alag video');
+        }
+        if(fileEl && fileEl.files && fileEl.files[0]){
+          const r=new FileReader();
+          r.onload=e=>setV(e.target.result,false);
+          r.readAsDataURL(fileEl.files[0]);
+        } else if(url){
+          setV(url, url.includes('youtube')||url.includes('youtu.be'));
+        } else {
+          alert('Video select karo ya URL dalo');
+        }
+      };
+    }
+
+    restoreAllVideos();
+  }, 1000);
+
+  setTimeout(restoreAllVideos, 2000);
+  setInterval(restoreAllVideos, 3000);
+})();
+</script>
+
+
+<style id="video-no-interact">
+.v-wrap, .v-wrap2, .v-wrap3 {
+  position: relative;
+  cursor: default !important;
+}
+.v-wrap video, .v-wrap2 video, .v-wrap3 video {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+.v-wrap iframe, .v-wrap2 iframe, .v-wrap3 iframe {
+  pointer-events: none !important;
+}
+.video-overlay-block {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  z-index: 10;
+  cursor: default;
+}
+.video-delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.is-editing .video-delete-btn {
+  display: flex !important;
+}
+</style>
+<script>
+(function(){
+  function addVideoControls(){
+    [1,2,3].forEach(slot=>{
+      const wrapId = slot===1 ? 'v-wrap' : 'v-wrap'+slot;
+      const wrap = document.getElementById(wrapId);
+      if(!wrap) return;
+      // Add overlay if not exists
+      if(!wrap.querySelector('.video-overlay-block')){
+        const overlay = document.createElement('div');
+        overlay.className = 'video-overlay-block';
+        overlay.title = 'Video Ad - Click disabled';
+        // Prevent any click action
+        overlay.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); return false; });
+        overlay.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); });
+        wrap.appendChild(overlay);
+      }
+      // Add delete button if not exists
+      if(!wrap.querySelector('.video-delete-btn')){
+        const delBtn = document.createElement('button');
+        delBtn.className = 'video-delete-btn';
+        delBtn.textContent = '×';
+        delBtn.title = 'Video Ad '+slot+' hatao';
+        delBtn.onclick = function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          if(confirm('Video Ad '+slot+' hatana hai?')){
+            const key = slot===1 ? 'navgrah_video_ad' : 'navgrah_video_ad'+slot;
+            localStorage.removeItem(key);
+            const label = wrap.querySelector('.v-label');
+            wrap.innerHTML = label ? label.outerHTML : `<span class="v-label">AD ${slot}</span>`;
+            wrap.classList.remove('has-video');
+            // re-add overlay and delete btn will be added again on next restore, but add now
+            setTimeout(addVideoControls, 100);
+            alert('Video Ad '+slot+' hata diya ✓');
+          }
+        };
+        wrap.appendChild(delBtn);
+      }
+      // Make videos non-interactive
+      const videos = wrap.querySelectorAll('video');
+      videos.forEach(v=>{
+        v.removeAttribute('controls');
+        v.setAttribute('disablePictureInPicture','');
+        v.setAttribute('controlsList','nodownload nofullscreen noremoteplayback noplaybackrate');
+        v.style.pointerEvents='none';
+      });
+    });
+  }
+
+  // Run initially and on any DOM change
+  setTimeout(addVideoControls, 1000);
+  setInterval(addVideoControls, 2000);
+
+  const obs = new MutationObserver(function(){
+    addVideoControls();
+  });
+  obs.observe(document.body, {childList:true, subtree:true});
+
+  console.log('Video non-clickable + delete btn active');
 })();
 </script>
 
