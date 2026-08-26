@@ -9,7 +9,20 @@
 
 
 
-
+<style id="only-image-clear">
+/* Agarbatti packet pura clear dikhe - cut nahi hoga */
+div[class*="grid"] img,
+.product-card img,
+.bg-white img {
+  object-fit: contain !important;
+  object-position: center !important;
+  background: white !important;
+}
+div[class*="grid"] > div > div:first-child,
+.product-card > div:first-child {
+  background: white !important;
+}
+</style>
 
 
 <style id="admin-features">
@@ -25,71 +38,6 @@
 .v-wrap.has-video{display:block}
 .v-wrap video,.v-wrap iframe{width:100%;height:300px;display:block}
 @media(min-width:768px){.v-wrap video,.v-wrap iframe{height:400px}}
-</style>
-
-
-<style id="image-box-bada-zoom">
-/* Image box bada karo, jar zoom me sahi se dikhe - koi aur change nahi */
-
-/* Product card ka image wala box bada */
-div[class*="grid"] > div > div:first-child,
-.product-card > div:first-child,
-div[class*="relative"][class*="overflow-hidden"]:first-child {
-  height: 380px !important;
-  min-height: 380px !important;
-  max-height: 380px !important;
-  background: white !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 6px !important;
-  overflow: hidden !important;
-}
-
-/* Jar image ko zoom bada */
-div[class*="grid"] img,
-.product-card img,
-.bg-white img,
-img[class*="object-contain"],
-img[class*="object-cover"] {
-  height: 360px !important;
-  max-height: 360px !important;
-  min-height: 360px !important;
-  width: 95% !important;
-  max-width: 95% !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  background: white !important;
-  transform: scale(1.15) !important;
-  transform-origin: center center !important;
-  transition: transform 0.3s ease !important;
-}
-
-/* Hover pe aur zoom */
-div[class*="grid"] > div:hover img,
-.product-card:hover img {
-  transform: scale(1.25) !important;
-}
-
-/* Modal me bhi bada zoom */
-div[class*="fixed"] img {
-  max-height: 60vh !important;
-  transform: scale(1.1) !important;
-}
-
-@media (max-width: 640px) {
-  div[class*="grid"] > div > div:first-child {
-    height: 340px !important;
-    min-height: 340px !important;
-    max-height: 340px !important;
-  }
-  div[class*="grid"] img {
-    height: 320px !important;
-    max-height: 320px !important;
-    min-height: 320px !important;
-    transform: scale(1.12) !important;
-  }
-}
 </style>
 
 </head>
@@ -226,7 +174,7 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
         const tmpl=grid.children[0];
         const card=tmpl.cloneNode(true);
         const img=card.querySelector('img');
-        if(img){img.src=src; img.style.display='block'; img.style.objectFit='contain'; img.style.height='auto'; img.style.maxHeight='360px'; img.style.background='white';}
+        if(img){img.src=src; img.style.display='block'; img.style.objectFit='contain'; img.style.height='auto'; img.style.maxHeight='420px'; img.style.background='white';}
         const h3=card.querySelector('h3'); if(h3) h3.textContent=name;
         card.querySelectorAll('.my-del').forEach(x=>x.remove());
         const b=document.createElement('button'); b.className='my-del'; b.textContent='×'; b.style.display='flex';
