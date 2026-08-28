@@ -342,7 +342,6 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
     const tmpl = grid.children[0];
     if(!tmpl) return;
     saved.forEach(prod=>{
-      // Check if already exists (by name)
       const exists = Array.from(grid.children).some(ch=>{
         const h3 = ch.querySelector('h3');
         return h3 && h3.textContent.trim()===prod.name;
@@ -352,13 +351,35 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
       const img = card.querySelector('img');
       if(img){ img.src=prod.src; img.style.display='block'; img.style.objectFit='contain'; img.style.height='auto'; img.style.maxHeight='420px'; img.style.background='white'; }
       const h3 = card.querySelector('h3'); if(h3) h3.textContent=prod.name;
+      // Set details in card
+      try{
+        const bulletDivs = card.querySelectorAll('div');
+        bulletDivs.forEach(d=>{
+          if(d.textContent.includes('20 sticks') || d.textContent.includes('Long burning')){
+            if(prod.details){
+              const lines = prod.details.split('\n').filter(l=>l.trim());
+              if(lines.length>0){
+                d.innerHTML = lines.map(l=>'<div>• '+l.replace(/^•\s*/,'')+'</div>').join('');
+              }
+            }
+          }
+        });
+      }catch(e){}
       card.querySelectorAll('.my-del').forEach(x=>x.remove());
+      card.style.cursor='pointer';
+      card.onclick = function(e){
+        if(e.target.classList.contains('my-del')) return;
+        if(document.body.classList.contains('is-editing')) return;
+        window.openCustomProduct(prod.name, prod.src, prod.details||'');
+      };
       const b=document.createElement('button'); b.className='my-del'; b.textContent='×'; b.style.display='';
       b.onclick=(e)=>{e.preventDefault(); e.stopPropagation(); if(confirm('Delete '+prod.name+'?')){ card.remove(); 
         let arr=getAddedProducts(); arr=arr.filter(p=>p.name!==prod.name); saveAddedProducts(arr);
       }};
       card.appendChild(b);
       card.style.position='relative';
+      card.setAttribute('data-custom-name', prod.name);
+      card.setAttribute('data-custom-src', prod.src);
       grid.appendChild(card);
     });
     console.log('Restored added products', saved.length);
@@ -594,26 +615,66 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
           const card=tmpl.cloneNode(true);
           const img=card.querySelector('img');
           if(img){ img.src=src; img.style.display='block'; img.style.objectFit='contain'; img.style.height='auto'; img.style.maxHeight='420px'; img.style.background='white'; }
+          // Set title
           const h3=card.querySelector('h3'); if(h3) h3.textContent=name;
+          // Set details - find all editable divs
+          try{
+            // Find the details container (the one with bullet points)
+            const editables = card.querySelectorAll('[data-editable]');
+            editables.forEach(ed=>{
+              const k = ed.getAttribute('data-editable')||'';
+              // Skip title which we already set
+              if(k.includes('title') || ed.tagName==='H3') return;
+              // If details provided, try to fill
+              if(details && k.toLowerCase().includes('desc') || k.toLowerCase().includes('detail') || ed.textContent.includes('sticks') || ed.textContent.includes('burning')){
+                // Replace bullet content
+                const lines = details.split('\n').filter(l=>l.trim());
+                if(lines.length>0){
+                  ed.innerHTML = lines.map(l=>'<div>• '+l.replace(/^•\s*/,'')+'</div>').join('');
+                } else if(details.trim()){
+                  ed.innerHTML = '<div>• '+details+'</div>';
+                }
+              }
+            });
+            // Also try to find div with • inside
+            const bulletDivs = card.querySelectorAll('div');
+            bulletDivs.forEach(d=>{
+              if(d.textContent.includes('20 sticks') || d.textContent.includes('Long burning')){
+                if(details){
+                  const lines = details.split('\n').filter(l=>l.trim());
+                  if(lines.length>0){
+                    d.innerHTML = lines.map(l=>'<div>• '+l.replace(/^•\s*/,'')+'</div>').join('');
+                  }
+                }
+              }
+            });
+          }catch(e){ console.log('details set error', e); }
+
           card.querySelectorAll('.my-del').forEach(x=>x.remove());
+          card.style.cursor='pointer';
+          card.onclick = function(e){
+            if(e.target.classList.contains('my-del')) return;
+            if(document.body.classList.contains('is-editing')) return;
+            window.openCustomProduct(name, src, details);
+          };
           const b=document.createElement('button'); b.className='my-del'; b.textContent='×'; 
-          // No inline flex - CSS will show only in edit mode
           b.style.display='';
           b.onclick=(e)=>{e.preventDefault(); e.stopPropagation(); if(confirm('Delete '+name+'?')){ card.remove(); let arr=getAddedProducts(); arr=arr.filter(p=>p.name!==name); saveAddedProducts(arr); }};
           card.appendChild(b);
           card.style.position='relative';
+          card.setAttribute('data-custom-name', name);
+          card.setAttribute('data-custom-src', src);
+          card.setAttribute('data-custom-details', details);
           grid.appendChild(card);
-          // SAVE to localStorage
           let arr=getAddedProducts();
           arr.push({name:name, src:src, details:details});
           saveAddedProducts(arr);
-          // CLOSE PANEL AND EDIT MODE - so delete X disappears after save (user request)
           if(nameEl) nameEl.value='';
           if(detailsEl) detailsEl.value='';
           if(urlEl) urlEl.value='';
           if(fileEl) fileEl.value='';
           closeEditMode();
-          alert('Product add ho gaya! Save ho gaya ✓ - Delete option ab band ho gaya');
+          alert('Product add ho gaya! Save ho gaya ✓ - Home jaisa hi open hoga');
           setTimeout(()=>{ card.scrollIntoView({behavior:'smooth'}); }, 200);
         }
         if(fileEl && fileEl.files && fileEl.files[0]){
@@ -675,6 +736,108 @@ body{font-family:'Inter','Noto Sans Devanagari',system-ui,sans-serif}
   }, 1500);
 
 })();
+</script>
+
+
+
+
+
+<style id="custom-product-modal-style-v2">
+.custom-prod-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10002;display:none;align-items:center;justify-content:center;padding:10px}
+.custom-prod-overlay.active{display:flex}
+.custom-prod-box{background:white;border-radius:18px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.custom-prod-box img{width:100%;height:auto;max-height:420px;object-fit:contain;background:white;display:block;border-radius:18px 18px 0 0}
+.custom-prod-info{padding:14px}
+.custom-prod-close{position:absolute;top:10px;right:10px;background:#ef4444;color:white;border:none;border-radius:50%;width:38px;height:38px;font-weight:bold;font-size:22px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.custom-prod-title{font-size:22px;font-weight:900;margin:0 0 6px 0;color:#111;border:2px dashed #ddd;padding:8px 10px;border-radius:8px;background:#fffef5}
+.custom-prod-subtitle{font-size:15px;color:#666;margin:0 0 10px 0;border:2px dashed #ddd;padding:8px 10px;border-radius:8px;background:#f9f9f9}
+.custom-prod-details{border:2px dashed #f97316;padding:10px 12px;border-radius:10px;background:#fff7ed;margin:0 0 12px 0}
+.custom-prod-details div{margin:6px 0;display:flex;gap:6px;align-items:flex-start}
+.custom-prod-details div span.dot{color:#f97316;font-weight:bold}
+.custom-prod-badges{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.custom-prod-badge{border:1px solid #ddd;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;background:#f5f5f5}
+.custom-prod-order{display:block;width:100%;background:#16a34a;color:white;text-align:center;padding:14px;border-radius:12px;font-weight:800;text-decoration:none;margin-top:14px;font-size:16px}
+</style>
+<div id="custom-prod-modal" class="custom-prod-overlay">
+  <div class="custom-prod-box">
+    <button class="custom-prod-close" onclick="document.getElementById('custom-prod-modal').classList.remove('active')">×</button>
+    <img id="custom-prod-img" src="" alt="">
+    <div class="custom-prod-info">
+      <div id="custom-prod-title" class="custom-prod-title"></div>
+      <div id="custom-prod-subtitle" class="custom-prod-subtitle" style="display:none"></div>
+      <div id="custom-prod-details-box" class="custom-prod-details"></div>
+      <div class="custom-prod-badges">
+        <span class="custom-prod-badge" id="custom-prod-mrp">MRP: ₹40 (Editable)</span>
+        <span class="custom-prod-badge" id="custom-prod-wt">Wt: 20 Sticks</span>
+      </div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px;color:#9a3412">🪔 Shuddh & Natural / शुद्ध</div>
+      <a id="custom-prod-whatsapp" href="#" target="_blank" class="custom-prod-order">📲 WhatsApp pe Order Karo - 8329323516</a>
+    </div>
+  </div>
+</div>
+<script>
+window.openCustomProduct = function(name, src, details){
+  const modal = document.getElementById('custom-prod-modal');
+  const img = document.getElementById('custom-prod-img');
+  const titleEl = document.getElementById('custom-prod-title');
+  const subEl = document.getElementById('custom-prod-subtitle');
+  const detailsBox = document.getElementById('custom-prod-details-box');
+  const wa = document.getElementById('custom-prod-whatsapp');
+  if(!modal) return;
+  if(img) img.src = src;
+  if(titleEl) titleEl.textContent = name;
+  // Try to split details into lines
+  let detailText = details || '';
+  // If details contains Hindi translation, show as subtitle
+  const lines = detailText.split('\n').filter(l=>l.trim());
+  let mainTitle = name;
+  let subTitle = '';
+  let bulletLines = [];
+  lines.forEach(line=>{
+    line=line.trim();
+    if(line.length<40 && /[\u0900-\u097F]/.test(line) && !subTitle){
+      subTitle = line;
+    } else {
+      bulletLines.push(line);
+    }
+  });
+  if(subTitle && subEl){
+    subEl.textContent = subTitle;
+    subEl.style.display='block';
+  } else if(subEl){
+    subEl.style.display='none';
+  }
+  if(detailsBox){
+    detailsBox.innerHTML='';
+    if(bulletLines.length===0){
+      // Default bullets like home page
+      bulletLines = [
+        '20 sticks pack / 20 स्टिक पैक',
+        'Long burning / लंबा जलने का समय',
+        'For Hawan & Pooja / हवन पूजा के लिए',
+        'Strong fragrance / तेज़ खुशबू'
+      ];
+      if(detailText) bulletLines = [detailText];
+    }
+    bulletLines.forEach(l=>{
+      if(!l.trim()) return;
+      const div = document.createElement('div');
+      const dot = document.createElement('span'); dot.className='dot'; dot.textContent='•';
+      const txt = document.createElement('span'); txt.textContent=' ' + l.replace(/^•\s*/, '');
+      div.appendChild(dot);
+      div.appendChild(txt);
+      detailsBox.appendChild(div);
+    });
+  }
+  if(wa){
+    const msg = encodeURIComponent('Namaste, mujhe ye product chahiye: ' + name + ' - ' + src);
+    wa.href = 'https://wa.me/918329323516?text=' + msg;
+  }
+  modal.classList.add('active');
+};
+document.getElementById('custom-prod-modal').addEventListener('click', function(e){
+  if(e.target===this) this.classList.remove('active');
+});
 </script>
 
 </body>
